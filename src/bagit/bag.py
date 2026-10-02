@@ -63,7 +63,9 @@ def make_bag(
     bag_dir = os.path.abspath(bag_dir)
     cwd = os.path.abspath(os.path.curdir)
 
-    if cwd.startswith(bag_dir) and cwd != bag_dir:
+    # Compare with a trailing separator so that a sibling such as "bag2" is not
+    # mistaken for a subdirectory of "bag":
+    if cwd.startswith(os.path.join(bag_dir, "")) and cwd != bag_dir:
         raise RuntimeError(
             _("Bagging a parent of the current directory is not supported")
         )

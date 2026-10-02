@@ -688,6 +688,51 @@ class TestBag(SelfCleaningTestCase):
             str(error_catcher.exception),
         )
 
+    def make_sibling_directories(self):
+        """Return two sibling directories "bag" (with a file) and "bag2" """
+        base = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, base)
+
+        bag_dir = j(base, "bag")
+        os.makedirs(bag_dir)
+        with open(j(bag_dir, "file.txt"), "w") as f:
+            f.write("payload\n")
+
+        other_dir = j(base, "bag2")
+        os.makedirs(other_dir)
+
+        return bag_dir, other_dir
+
+    def test_make_bag_refuses_parent_of_working_directory(self):
+        subdirectory = j(self.tmpdir, "subdirectory")
+        os.makedirs(subdirectory)
+        os.chdir(subdirectory)
+
+        with self.assertRaises(RuntimeError) as error_catcher:
+            bagit.make_bag(self.tmpdir)
+
+        self.assertEqual(
+            "Bagging a parent of the current directory is not supported",
+            str(error_catcher.exception),
+        )
+
+    def test_make_bag_in_working_directory(self):
+        bag_dir, _other_dir = self.make_sibling_directories()
+        os.chdir(bag_dir)
+
+        bag = bagit.make_bag(bag_dir)
+
+        self.assertTrue(bag.is_valid())
+
+    def test_make_bag_with_name_similar_to_working_directory(self):
+        # "bag2" starts with the text "bag" but is not inside of it:
+        bag_dir, other_dir = self.make_sibling_directories()
+        os.chdir(other_dir)
+
+        bag = bagit.make_bag(bag_dir)
+
+        self.assertTrue(bag.is_valid())
+
     def test_make_bag_with_unreadable_source(self):
         os.chmod(self.tmpdir, 0)
 
