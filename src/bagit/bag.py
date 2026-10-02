@@ -53,6 +53,7 @@ def make_bag(
                 "The `checksum` argument for `make_bag` should be replaced with `checksums`"
             ),
             DeprecationWarning,
+            stacklevel=2,
         )
         checksums = checksum
 
@@ -194,7 +195,11 @@ class Bag(object):
     @property
     def algs(self):
         """Deprecated alias for Bag.algorithms."""
-        warnings.warn(_("Use Bag.algorithms instead of Bag.algs"), DeprecationWarning)
+        warnings.warn(
+            _("Use Bag.algorithms instead of Bag.algs"),
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self.algorithms
 
     @property
@@ -203,6 +208,7 @@ class Bag(object):
         warnings.warn(
             _("Use the Bag.version_info tuple instead of Bag.version"),
             DeprecationWarning,
+            stacklevel=2,
         )
         return self._version
 

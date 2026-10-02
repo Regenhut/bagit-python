@@ -633,6 +633,34 @@ class TestBag(SelfCleaningTestCase):
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha1.txt")))
         self.assertFalse(os.path.exists(j(self.tmpdir, "manifest-sha256.txt")))
 
+    # Deprecation warnings must point at the code that uses the deprecated
+    # feature, not into the bagit package: Python hides DeprecationWarnings
+    # raised from library code by default, so users would never see them.
+
+    def test_make_bag_checksum_warning_points_at_caller(self):
+        with self.assertWarns(DeprecationWarning) as caught:
+            bagit.make_bag(self.tmpdir, checksum=["sha1"])
+
+        self.assertTrue(os.path.samefile(caught.filename, __file__))
+
+    def test_bag_algs_is_deprecated_and_warns_at_caller(self):
+        bag = bagit.make_bag(self.tmpdir)
+
+        with self.assertWarns(DeprecationWarning) as caught:
+            algs = bag.algs
+
+        self.assertEqual(algs, bag.algorithms)
+        self.assertTrue(os.path.samefile(caught.filename, __file__))
+
+    def test_bag_version_is_deprecated_and_warns_at_caller(self):
+        bag = bagit.make_bag(self.tmpdir)
+
+        with self.assertWarns(DeprecationWarning) as caught:
+            version = bag.version
+
+        self.assertEqual(version, bag.tags["BagIt-Version"])
+        self.assertTrue(os.path.samefile(caught.filename, __file__))
+
     def test_make_bag_with_empty_directory(self):
         tmpdir = tempfile.mkdtemp()
         try:
