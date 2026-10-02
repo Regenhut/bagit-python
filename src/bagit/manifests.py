@@ -106,17 +106,23 @@ def _make_tagmanifest_file(alg, bag_dir, encoding="utf-8"):
 
 def _find_tag_files(bag_dir):
     """Yield relative paths of all tag files (everything except data/ and tagmanifests)."""
-    for dir in os.listdir(bag_dir):
-        if dir != "data":
-            if os.path.isfile(dir) and not dir.startswith("tagmanifest-"):
-                yield dir
-            for dir_name, dirnames, filenames in os.walk(dir):
-                for filename in filenames:
-                    if filename.startswith("tagmanifest-"):
-                        continue
-                    # remove everything up to the bag_dir directory
-                    p = os.path.join(dir_name, filename)
-                    yield os.path.relpath(p, bag_dir)
+    for name in os.listdir(bag_dir):
+        if name == "data":
+            continue
+
+        # Build every path from bag_dir so that the result does not depend on
+        # the current working directory:
+        full_path = os.path.join(bag_dir, name)
+
+        if os.path.isfile(full_path) and not name.startswith("tagmanifest-"):
+            yield name
+
+        for dir_name, dirnames, filenames in os.walk(full_path):
+            for filename in filenames:
+                if filename.startswith("tagmanifest-"):
+                    continue
+                path = os.path.join(dir_name, filename)
+                yield os.path.relpath(path, bag_dir)
 
 
 def _encode_filename(s):
