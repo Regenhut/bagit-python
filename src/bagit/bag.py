@@ -63,9 +63,13 @@ def make_bag(
     bag_dir = os.path.abspath(bag_dir)
     cwd = os.path.abspath(os.path.curdir)
 
-    # Compare with a trailing separator so that a sibling such as "bag2" is not
-    # mistaken for a subdirectory of "bag":
-    if cwd.startswith(os.path.join(bag_dir, "")) and cwd != bag_dir:
+    # Compare the real paths, because the working directory is always reported
+    # with symlinks resolved while bag_dir may contain one (/var is a link to
+    # /private/var on macOS). Use a trailing separator so that a sibling such
+    # as "bag2" is not mistaken for a subdirectory of "bag":
+    real_cwd = os.path.realpath(cwd)
+    real_bag_dir = os.path.realpath(bag_dir)
+    if real_cwd.startswith(os.path.join(real_bag_dir, "")) and real_cwd != real_bag_dir:
         raise RuntimeError(
             _("Bagging a parent of the current directory is not supported")
         )

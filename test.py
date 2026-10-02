@@ -716,6 +716,32 @@ class TestBag(SelfCleaningTestCase):
             str(error_catcher.exception),
         )
 
+    @unittest.skipUnless(hasattr(os, "symlink"), "requires symlink support")
+    def test_make_bag_refuses_parent_of_working_directory_via_symlink(self):
+        # The current working directory is always reported with symlinks
+        # resolved, but the path to the bag may contain one. On macOS this is
+        # the normal case because /var is a link to /private/var.
+        subdirectory = j(self.tmpdir, "subdirectory")
+        os.makedirs(subdirectory)
+
+        link_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, link_dir)
+        link = j(link_dir, "bag-link")
+        try:
+            os.symlink(self.tmpdir, link)
+        except (OSError, NotImplementedError):
+            self.skipTest("cannot create symlinks here")
+
+        os.chdir(subdirectory)
+
+        with self.assertRaises(RuntimeError) as error_catcher:
+            bagit.make_bag(link)
+
+        self.assertEqual(
+            "Bagging a parent of the current directory is not supported",
+            str(error_catcher.exception),
+        )
+
     def test_make_bag_in_working_directory(self):
         bag_dir, _other_dir = self.make_sibling_directories()
         os.chdir(bag_dir)
