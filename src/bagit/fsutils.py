@@ -6,7 +6,6 @@ import unicodedata
 from ._common import LOGGER, _
 from .errors import BagError, FileNormalizationConflict
 
-
 # The Unicode normalization form used here doesn't matter – all we care about
 # is consistency since the input value will be preserved:
 

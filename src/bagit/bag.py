@@ -33,7 +33,6 @@ from .hashing import (
 from .manifests import _decode_filename, _make_tagmanifest_file, make_manifests
 from .tagfiles import _load_tag_file, _make_tag_file
 
-
 # This is the same as decoding the byte values in codecs.BOM:
 UNICODE_BYTE_ORDER_MARK = "\ufeff"
 
