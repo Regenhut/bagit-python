@@ -457,7 +457,7 @@ class TestMultiprocessValidation(TestSingleProcessValidation):
             bag, *args, processes=2, **kwargs
         )
 
-    @mock.patch("bagit.multiprocessing.Pool")
+    @mock.patch("multiprocessing.Pool")
     def test_validate_multiprocessing_terminates_and_joins_pool_on_failure(self, pool):
         pool.return_value.map.side_effect = RuntimeError("boom")
         bag = bagit.make_bag(self.tmpdir)
@@ -474,7 +474,7 @@ class TestMultiprocessValidation(TestSingleProcessValidation):
             ],
         )
 
-    @mock.patch("bagit.multiprocessing.Pool")
+    @mock.patch("multiprocessing.Pool")
     def test_validate_pool_error(self, pool):
         # Simulate the Pool constructor raising a RuntimeError.
         pool.side_effect = RuntimeError
@@ -761,7 +761,7 @@ Tag-File-Character-Encoding: UTF-8
         bagit.make_bag(self.tmpdir, processes=2)
         self.assertTrue(os.path.isdir(j(self.tmpdir, "data")))
 
-    @mock.patch("bagit.multiprocessing.Pool")
+    @mock.patch("multiprocessing.Pool")
     def test_make_bag_multiprocessing_terminates_and_joins_pool_on_failure(self, pool):
         pool.return_value.map.side_effect = RuntimeError("boom")
         with self.assertRaises(RuntimeError):
