@@ -65,7 +65,7 @@ class SelfCleaningTestCase(unittest.TestCase):
 
 
 @mock.patch(
-    "bagit.VERSION", new="1.5.4"
+    "bagit.bag.VERSION", new="1.5.4"
 )  # This avoids needing to change expected hashes on each release
 class TestSingleProcessValidation(SelfCleaningTestCase):
     def validate(self, bag, *args, **kwargs):
@@ -485,7 +485,7 @@ class TestMultiprocessValidation(TestSingleProcessValidation):
 
 
 @mock.patch(
-    "bagit.VERSION", new="1.5.4"
+    "bagit.bag.VERSION", new="1.5.4"
 )  # This avoids needing to change expected hashes on each release
 class TestBag(SelfCleaningTestCase):
     def test_make_bag(self):
@@ -883,7 +883,7 @@ Tag-File-Character-Encoding: UTF-8
         bag = bagit.make_bag(self.tmpdir)
         starting_cwd = os.getcwd()
 
-        with mock.patch("bagit._make_tag_file", side_effect=RuntimeError("boom")):
+        with mock.patch("bagit.bag._make_tag_file", side_effect=RuntimeError("boom")):
             with self.assertRaises(RuntimeError):
                 bag.save()
 
