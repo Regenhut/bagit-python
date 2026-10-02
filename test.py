@@ -65,14 +65,14 @@ class SelfCleaningTestCase(unittest.TestCase):
 
 
 @mock.patch(
-    "bagit.VERSION", new="1.5.4"
+    "bagit.bag.VERSION", new="1.5.4"
 )  # This avoids needing to change expected hashes on each release
 class TestSingleProcessValidation(SelfCleaningTestCase):
     def validate(self, bag, *args, **kwargs):
         return bag.validate(*args, **kwargs)
 
     def test_make_bag_sha1_sha256_manifest(self):
-        bag = bagit.make_bag(self.tmpdir, checksum=["sha1", "sha256"])
+        bag = bagit.make_bag(self.tmpdir, checksums=["sha1", "sha256"])
         # check that relevant manifests are created
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha1.txt")))
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha256.txt")))
@@ -80,7 +80,7 @@ class TestSingleProcessValidation(SelfCleaningTestCase):
         self.assertTrue(self.validate(bag, fast=True))
 
     def test_make_bag_md5_sha256_manifest(self):
-        bag = bagit.make_bag(self.tmpdir, checksum=["md5", "sha256"])
+        bag = bagit.make_bag(self.tmpdir, checksums=["md5", "sha256"])
         # check that relevant manifests are created
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-md5.txt")))
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha256.txt")))
@@ -88,7 +88,7 @@ class TestSingleProcessValidation(SelfCleaningTestCase):
         self.assertTrue(self.validate(bag, fast=True))
 
     def test_make_bag_md5_sha1_sha256_manifest(self):
-        bag = bagit.make_bag(self.tmpdir, checksum=["md5", "sha1", "sha256"])
+        bag = bagit.make_bag(self.tmpdir, checksums=["md5", "sha1", "sha256"])
         # check that relevant manifests are created
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-md5.txt")))
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha1.txt")))
@@ -438,7 +438,7 @@ class TestSingleProcessValidation(SelfCleaningTestCase):
 
     def test_sha1_tagfile(self):
         info = {"Bagging-Date": "1970-01-01", "Contact-Email": "ehs@pobox.com"}
-        bag = bagit.make_bag(self.tmpdir, checksum=["sha1"], bag_info=info)
+        bag = bagit.make_bag(self.tmpdir, checksums=["sha1"], bag_info=info)
         self.assertTrue(os.path.isfile(j(self.tmpdir, "tagmanifest-sha1.txt")))
         self.assertEqual(
             "f69110479d0d395f7c321b3860c2bc0c96ae9fe8",
@@ -446,7 +446,7 @@ class TestSingleProcessValidation(SelfCleaningTestCase):
         )
 
     def test_validate_unreadable_file(self):
-        bag = bagit.make_bag(self.tmpdir, checksum=["md5"])
+        bag = bagit.make_bag(self.tmpdir, checksums=["md5"])
         os.chmod(j(self.tmpdir, "data/loc/2478433644_2839c5e8b8_o_d.jpg"), 0)
         self.assertRaises(bagit.BagValidationError, self.validate, bag, fast=False)
 
@@ -457,7 +457,7 @@ class TestMultiprocessValidation(TestSingleProcessValidation):
             bag, *args, processes=2, **kwargs
         )
 
-    @mock.patch("bagit.multiprocessing.Pool")
+    @mock.patch("multiprocessing.Pool")
     def test_validate_multiprocessing_terminates_and_joins_pool_on_failure(self, pool):
         pool.return_value.map.side_effect = RuntimeError("boom")
         bag = bagit.make_bag(self.tmpdir)
@@ -474,7 +474,7 @@ class TestMultiprocessValidation(TestSingleProcessValidation):
             ],
         )
 
-    @mock.patch("bagit.multiprocessing.Pool")
+    @mock.patch("multiprocessing.Pool")
     def test_validate_pool_error(self, pool):
         # Simulate the Pool constructor raising a RuntimeError.
         pool.side_effect = RuntimeError
@@ -485,7 +485,7 @@ class TestMultiprocessValidation(TestSingleProcessValidation):
 
 
 @mock.patch(
-    "bagit.VERSION", new="1.5.4"
+    "bagit.bag.VERSION", new="1.5.4"
 )  # This avoids needing to change expected hashes on each release
 class TestBag(SelfCleaningTestCase):
     def test_make_bag(self):
@@ -546,7 +546,7 @@ class TestBag(SelfCleaningTestCase):
         self.assertIn("0a6ffcffe67e9a34e44220f7ebcb4baa bag-info.txt", tagmanifest_txt)
 
     def test_make_bag_sha1_manifest(self):
-        bagit.make_bag(self.tmpdir, checksum=["sha1"])
+        bagit.make_bag(self.tmpdir, checksums=["sha1"])
         # check manifest
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha1.txt")))
         manifest_txt = slurp_text_file(j(self.tmpdir, "manifest-sha1.txt")).splitlines()
@@ -571,7 +571,7 @@ class TestBag(SelfCleaningTestCase):
         )
 
     def test_make_bag_sha256_manifest(self):
-        bagit.make_bag(self.tmpdir, checksum=["sha256"])
+        bagit.make_bag(self.tmpdir, checksums=["sha256"])
         # check manifest
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha256.txt")))
         manifest_txt = slurp_text_file(
@@ -595,7 +595,7 @@ class TestBag(SelfCleaningTestCase):
         )
 
     def test_make_bag_sha512_manifest(self):
-        bagit.make_bag(self.tmpdir, checksum=["sha512"])
+        bagit.make_bag(self.tmpdir, checksums=["sha512"])
         # check manifest
         self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha512.txt")))
         manifest_txt = slurp_text_file(
@@ -620,8 +620,46 @@ class TestBag(SelfCleaningTestCase):
 
     def test_make_bag_unknown_algorithm(self):
         self.assertRaises(
-            ValueError, bagit.make_bag, self.tmpdir, checksum=["not-really-a-name"]
+            ValueError, bagit.make_bag, self.tmpdir, checksums=["not-really-a-name"]
         )
+
+    def test_make_bag_checksum_argument_is_deprecated(self):
+        # The old singular `checksum` argument must warn but keep working:
+        with self.assertWarns(DeprecationWarning) as caught:
+            bag = bagit.make_bag(self.tmpdir, checksum=["sha1"])
+
+        self.assertIn("checksums", str(caught.warning))
+        self.assertEqual(bag.algorithms, ["sha1"])
+        self.assertTrue(os.path.isfile(j(self.tmpdir, "manifest-sha1.txt")))
+        self.assertFalse(os.path.exists(j(self.tmpdir, "manifest-sha256.txt")))
+
+    # Deprecation warnings must point at the code that uses the deprecated
+    # feature, not into the bagit package: Python hides DeprecationWarnings
+    # raised from library code by default, so users would never see them.
+
+    def test_make_bag_checksum_warning_points_at_caller(self):
+        with self.assertWarns(DeprecationWarning) as caught:
+            bagit.make_bag(self.tmpdir, checksum=["sha1"])
+
+        self.assertTrue(os.path.samefile(caught.filename, __file__))
+
+    def test_bag_algs_is_deprecated_and_warns_at_caller(self):
+        bag = bagit.make_bag(self.tmpdir)
+
+        with self.assertWarns(DeprecationWarning) as caught:
+            algs = bag.algs
+
+        self.assertEqual(algs, bag.algorithms)
+        self.assertTrue(os.path.samefile(caught.filename, __file__))
+
+    def test_bag_version_is_deprecated_and_warns_at_caller(self):
+        bag = bagit.make_bag(self.tmpdir)
+
+        with self.assertWarns(DeprecationWarning) as caught:
+            version = bag.version
+
+        self.assertEqual(version, bag.tags["BagIt-Version"])
+        self.assertTrue(os.path.samefile(caught.filename, __file__))
 
     def test_make_bag_with_empty_directory(self):
         tmpdir = tempfile.mkdtemp()
@@ -650,11 +688,82 @@ class TestBag(SelfCleaningTestCase):
             str(error_catcher.exception),
         )
 
+    def make_sibling_directories(self):
+        """Return two sibling directories "bag" (with a file) and "bag2" """
+        base = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, base)
+
+        bag_dir = j(base, "bag")
+        os.makedirs(bag_dir)
+        with open(j(bag_dir, "file.txt"), "w") as f:
+            f.write("payload\n")
+
+        other_dir = j(base, "bag2")
+        os.makedirs(other_dir)
+
+        return bag_dir, other_dir
+
+    def test_make_bag_refuses_parent_of_working_directory(self):
+        subdirectory = j(self.tmpdir, "subdirectory")
+        os.makedirs(subdirectory)
+        os.chdir(subdirectory)
+
+        with self.assertRaises(RuntimeError) as error_catcher:
+            bagit.make_bag(self.tmpdir)
+
+        self.assertEqual(
+            "Bagging a parent of the current directory is not supported",
+            str(error_catcher.exception),
+        )
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "requires symlink support")
+    def test_make_bag_refuses_parent_of_working_directory_via_symlink(self):
+        # The current working directory is always reported with symlinks
+        # resolved, but the path to the bag may contain one. On macOS this is
+        # the normal case because /var is a link to /private/var.
+        subdirectory = j(self.tmpdir, "subdirectory")
+        os.makedirs(subdirectory)
+
+        link_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, link_dir)
+        link = j(link_dir, "bag-link")
+        try:
+            os.symlink(self.tmpdir, link)
+        except (OSError, NotImplementedError):
+            self.skipTest("cannot create symlinks here")
+
+        os.chdir(subdirectory)
+
+        with self.assertRaises(RuntimeError) as error_catcher:
+            bagit.make_bag(link)
+
+        self.assertEqual(
+            "Bagging a parent of the current directory is not supported",
+            str(error_catcher.exception),
+        )
+
+    def test_make_bag_in_working_directory(self):
+        bag_dir, _other_dir = self.make_sibling_directories()
+        os.chdir(bag_dir)
+
+        bag = bagit.make_bag(bag_dir)
+
+        self.assertTrue(bag.is_valid())
+
+    def test_make_bag_with_name_similar_to_working_directory(self):
+        # "bag2" starts with the text "bag" but is not inside of it:
+        bag_dir, other_dir = self.make_sibling_directories()
+        os.chdir(other_dir)
+
+        bag = bagit.make_bag(bag_dir)
+
+        self.assertTrue(bag.is_valid())
+
     def test_make_bag_with_unreadable_source(self):
         os.chmod(self.tmpdir, 0)
 
         with self.assertRaises(bagit.BagError) as error_catcher:
-            bagit.make_bag(self.tmpdir, checksum=["sha256"])
+            bagit.make_bag(self.tmpdir, checksums=["sha256"])
 
         self.assertEqual(
             "Missing permissions to move all files and directories",
@@ -666,7 +775,7 @@ class TestBag(SelfCleaningTestCase):
         os.chmod(j(self.tmpdir, "loc"), 0o200)
 
         with self.assertRaises(bagit.BagError) as error_catcher:
-            bagit.make_bag(self.tmpdir, checksum=["sha256"])
+            bagit.make_bag(self.tmpdir, checksums=["sha256"])
 
         self.assertEqual(
             "Read permissions are required to calculate file fixities",
@@ -680,7 +789,7 @@ class TestBag(SelfCleaningTestCase):
             os.chmod(j(self.tmpdir, path_suffix), 0o500)
 
         with self.assertRaises(bagit.BagError) as error_catcher:
-            bagit.make_bag(self.tmpdir, checksum=["sha256"])
+            bagit.make_bag(self.tmpdir, checksums=["sha256"])
 
         self.assertEqual(
             "Missing permissions to move all files and directories",
@@ -691,7 +800,7 @@ class TestBag(SelfCleaningTestCase):
         os.chmod(j(self.tmpdir, "loc", "2478433644_2839c5e8b8_o_d.jpg"), 0)
 
         with self.assertRaises(bagit.BagError) as error_catcher:
-            bagit.make_bag(self.tmpdir, checksum=["sha256"])
+            bagit.make_bag(self.tmpdir, checksums=["sha256"])
 
         self.assertEqual(
             "Read permissions are required to calculate file fixities",
@@ -761,7 +870,7 @@ Tag-File-Character-Encoding: UTF-8
         bagit.make_bag(self.tmpdir, processes=2)
         self.assertTrue(os.path.isdir(j(self.tmpdir, "data")))
 
-    @mock.patch("bagit.multiprocessing.Pool")
+    @mock.patch("multiprocessing.Pool")
     def test_make_bag_multiprocessing_terminates_and_joins_pool_on_failure(self, pool):
         pool.return_value.map.side_effect = RuntimeError("boom")
         with self.assertRaises(RuntimeError):
@@ -849,7 +958,7 @@ Tag-File-Character-Encoding: UTF-8
         self.assertEqual(os.stat(payload_dir).st_mode, new_perms)
 
     def test_save_bag_to_unwritable_directory(self):
-        bag = bagit.make_bag(self.tmpdir, checksum=["sha256"])
+        bag = bagit.make_bag(self.tmpdir, checksums=["sha256"])
 
         os.chmod(self.tmpdir, 0)
 
@@ -863,7 +972,7 @@ Tag-File-Character-Encoding: UTF-8
         )
 
     def test_save_bag_with_unwritable_file(self):
-        bag = bagit.make_bag(self.tmpdir, checksum=["sha256"])
+        bag = bagit.make_bag(self.tmpdir, checksums=["sha256"])
 
         os.chmod(os.path.join(self.tmpdir, "bag-info.txt"), 0)
 
@@ -912,7 +1021,7 @@ Tag-File-Character-Encoding: UTF-8
         self.assertTrue(bag.is_valid())
 
     def test_save_baginfo_with_sha1(self):
-        bag = bagit.make_bag(self.tmpdir, checksum=["sha1", "md5"])
+        bag = bagit.make_bag(self.tmpdir, checksums=["sha1", "md5"])
         self.assertTrue(bag.is_valid())
         bag.save()
 
@@ -972,11 +1081,74 @@ Tag-File-Character-Encoding: UTF-8
                 f.write(normalized_bytes)
 
         for alg in bag.algorithms:
-            bagit._make_tagmanifest_file(alg, bag.path, encoding=bag.encoding)
+            bagit.manifests._make_tagmanifest_file(alg, bag.path, encoding=bag.encoding)
 
         # Now we'll reload the whole thing:
         bag = bagit.Bag(self.tmpdir)
         self.assertTrue(bag.is_valid())
+
+    def make_bag_with_extra_tag_files(self):
+        """Make a bag and add tag files at the top level and in a subdirectory"""
+        bag = bagit.make_bag(self.tmpdir, checksums=["sha256"])
+
+        os.makedirs(j(self.tmpdir, "meta"))
+        for name in ("extra.txt", j("meta", "notes.txt")):
+            with open(j(self.tmpdir, name), "w") as f:
+                f.write("tag file\n")
+
+        return bag
+
+    def test_find_tag_files_does_not_depend_on_working_directory(self):
+        bag = self.make_bag_with_extra_tag_files()
+
+        # The tests run in the project directory, not inside the bag:
+        self.assertNotEqual(
+            os.path.realpath(os.getcwd()), os.path.realpath(self.tmpdir)
+        )
+
+        self.assertEqual(
+            sorted(bagit.manifests._find_tag_files(bag.path)),
+            sorted(
+                [
+                    "bag-info.txt",
+                    "bagit.txt",
+                    "extra.txt",
+                    "manifest-sha256.txt",
+                    j("meta", "notes.txt"),
+                ]
+            ),
+        )
+
+    def test_tagmanifest_lists_tag_files_when_written_from_another_directory(self):
+        bag = self.make_bag_with_extra_tag_files()
+
+        bagit.manifests._make_tagmanifest_file("sha256", bag.path)
+
+        tagmanifest = slurp_text_file(j(self.tmpdir, "tagmanifest-sha256.txt"))
+        listed = sorted(line.split(None, 1)[1] for line in tagmanifest.splitlines())
+        self.assertIn("extra.txt", listed)
+        self.assertIn(j("meta", "notes.txt"), listed)
+        self.assertTrue(bagit.Bag(self.tmpdir).is_valid())
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "requires symlink support")
+    def test_save_with_symlinked_bag_path_records_relative_tag_file_paths(self):
+        self.make_bag_with_extra_tag_files()
+
+        link_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, link_dir)
+        link = j(link_dir, "bag-link")
+        try:
+            os.symlink(self.tmpdir, link)
+        except (OSError, NotImplementedError):
+            self.skipTest("cannot create symlinks here")
+
+        # Opening the bag through the symlink must not change what is recorded:
+        bagit.Bag(link).save()
+
+        tagmanifest = slurp_text_file(j(self.tmpdir, "tagmanifest-sha256.txt"))
+        listed = sorted(line.split(None, 1)[1] for line in tagmanifest.splitlines())
+        self.assertIn(j("meta", "notes.txt"), listed)
+        self.assertEqual([name for name in listed if name.startswith("..")], [])
 
     def test_open_bag_with_missing_bagit_txt(self):
         bagit.make_bag(self.tmpdir)
@@ -1041,6 +1213,12 @@ Tag-File-Character-Encoding: UTF-8
             bagit.Bag(self.tmpdir)
 
         self.assertEqual("Unsupported encoding: WTF-8", str(error_catcher.exception))
+
+    def test_decode_filename_all_occurrences(self):
+        self.assertEqual(
+            bagit.manifests._decode_filename("a%0Db%0dc%0Ad%0ae%0Af"),
+            "a\rb\rc\nd\ne\nf",
+        )
 
 
 class TestFetch(SelfCleaningTestCase):

@@ -32,6 +32,12 @@ Homepage = "https://libraryofcongress.github.io/bagit-python/"
 [tool.ruff]
 target-version = "py38"
 
+[tool.ruff.lint]
+# Pin the rule set. CI installs the newest ruff, and newer releases enable more
+# rules by default; this is the set that was the default before (pycodestyle
+# errors, pyflakes) so that a ruff upgrade does not turn the checks red.
+select = ["E4", "E7", "E9", "F"]
+
 [tool.isort]
 line_length = 110
 default_section = "THIRDPARTY"
