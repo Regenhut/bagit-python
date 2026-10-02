@@ -184,7 +184,7 @@ def main():
                     processes=args.processes,
                     checksums=args.checksums,
                 )
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - log it and go on with the next bag
                 LOGGER.error(
                     _("Failed to create bag in %(bag_directory)s: %(error)s"),
                     {"bag_directory": bag_dir, "error": exc},

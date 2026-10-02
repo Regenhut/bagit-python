@@ -32,8 +32,8 @@ __doc__ = PACKAGE_DOC
 
 # The public API. Names starting with an underscore are internal helpers and
 # live in the module that defines them (e.g. bagit.manifests._decode_filename).
+# Sorted as ruff's RUF022 expects: constants, then classes, then functions.
 __all__ = [
-    # constants
     "CHECKSUM_ALGOS",
     "DEFAULT_CHECKSUMS",
     "HASH_BLOCK_SIZE",
@@ -44,19 +44,16 @@ __all__ = [
     "TRANSLATION_CATALOG",
     "UNICODE_BYTE_ORDER_MARK",
     "VERSION",
-    # classes
     "Bag",
     "BagArgumentParser",
-    "BagHeaderAction",
-    # exceptions
     "BagError",
+    "BagHeaderAction",
     "BagValidationError",
     "ChecksumMismatch",
     "FileMissing",
     "FileNormalizationConflict",
     "ManifestErrorDetail",
     "UnexpectedFile",
-    # functions
     "build_unicode_normalized_lookup_dict",
     "find_locale_dir",
     "generate_manifest_lines",
