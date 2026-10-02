@@ -1030,6 +1030,69 @@ Tag-File-Character-Encoding: UTF-8
         bag = bagit.Bag(self.tmpdir)
         self.assertTrue(bag.is_valid())
 
+    def make_bag_with_extra_tag_files(self):
+        """Make a bag and add tag files at the top level and in a subdirectory"""
+        bag = bagit.make_bag(self.tmpdir, checksums=["sha256"])
+
+        os.makedirs(j(self.tmpdir, "meta"))
+        for name in ("extra.txt", j("meta", "notes.txt")):
+            with open(j(self.tmpdir, name), "w") as f:
+                f.write("tag file\n")
+
+        return bag
+
+    def test_find_tag_files_does_not_depend_on_working_directory(self):
+        bag = self.make_bag_with_extra_tag_files()
+
+        # The tests run in the project directory, not inside the bag:
+        self.assertNotEqual(
+            os.path.realpath(os.getcwd()), os.path.realpath(self.tmpdir)
+        )
+
+        self.assertEqual(
+            sorted(bagit.manifests._find_tag_files(bag.path)),
+            sorted(
+                [
+                    "bag-info.txt",
+                    "bagit.txt",
+                    "extra.txt",
+                    "manifest-sha256.txt",
+                    j("meta", "notes.txt"),
+                ]
+            ),
+        )
+
+    def test_tagmanifest_lists_tag_files_when_written_from_another_directory(self):
+        bag = self.make_bag_with_extra_tag_files()
+
+        bagit.manifests._make_tagmanifest_file("sha256", bag.path)
+
+        tagmanifest = slurp_text_file(j(self.tmpdir, "tagmanifest-sha256.txt"))
+        listed = sorted(line.split(None, 1)[1] for line in tagmanifest.splitlines())
+        self.assertIn("extra.txt", listed)
+        self.assertIn(j("meta", "notes.txt"), listed)
+        self.assertTrue(bagit.Bag(self.tmpdir).is_valid())
+
+    @unittest.skipUnless(hasattr(os, "symlink"), "requires symlink support")
+    def test_save_with_symlinked_bag_path_records_relative_tag_file_paths(self):
+        self.make_bag_with_extra_tag_files()
+
+        link_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, link_dir)
+        link = j(link_dir, "bag-link")
+        try:
+            os.symlink(self.tmpdir, link)
+        except (OSError, NotImplementedError):
+            self.skipTest("cannot create symlinks here")
+
+        # Opening the bag through the symlink must not change what is recorded:
+        bagit.Bag(link).save()
+
+        tagmanifest = slurp_text_file(j(self.tmpdir, "tagmanifest-sha256.txt"))
+        listed = sorted(line.split(None, 1)[1] for line in tagmanifest.splitlines())
+        self.assertIn(j("meta", "notes.txt"), listed)
+        self.assertEqual([name for name in listed if name.startswith("..")], [])
+
     def test_open_bag_with_missing_bagit_txt(self):
         bagit.make_bag(self.tmpdir)
 
