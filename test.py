@@ -65,7 +65,7 @@ class SelfCleaningTestCase(unittest.TestCase):
 
 
 @mock.patch(
-    "bagit.VERSION", new="1.5.4"
+    "bagit.bag.VERSION", new="1.5.4"
 )  # This avoids needing to change expected hashes on each release
 class TestSingleProcessValidation(SelfCleaningTestCase):
     def validate(self, bag, *args, **kwargs):
@@ -485,7 +485,7 @@ class TestMultiprocessValidation(TestSingleProcessValidation):
 
 
 @mock.patch(
-    "bagit.VERSION", new="1.5.4"
+    "bagit.bag.VERSION", new="1.5.4"
 )  # This avoids needing to change expected hashes on each release
 class TestBag(SelfCleaningTestCase):
     def test_make_bag(self):
