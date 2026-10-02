@@ -986,7 +986,7 @@ Tag-File-Character-Encoding: UTF-8
                 f.write(normalized_bytes)
 
         for alg in bag.algorithms:
-            bagit._make_tagmanifest_file(alg, bag.path, encoding=bag.encoding)
+            bagit.manifests._make_tagmanifest_file(alg, bag.path, encoding=bag.encoding)
 
         # Now we'll reload the whole thing:
         bag = bagit.Bag(self.tmpdir)
@@ -1058,7 +1058,8 @@ Tag-File-Character-Encoding: UTF-8
 
     def test_decode_filename_all_occurrences(self):
         self.assertEqual(
-            bagit._decode_filename("a%0Db%0dc%0Ad%0ae%0Af"), "a\rb\rc\nd\ne\nf"
+            bagit.manifests._decode_filename("a%0Db%0dc%0Ad%0ae%0Af"),
+            "a\rb\rc\nd\ne\nf",
         )
 
 
