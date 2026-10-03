@@ -1042,6 +1042,11 @@ Tag-File-Character-Encoding: UTF-8
 
         self.assertEqual("Unsupported encoding: WTF-8", str(error_catcher.exception))
 
+    def test_decode_filename_all_occurrences(self):
+        self.assertEqual(
+            bagit._decode_filename("a%0Db%0dc%0Ad%0ae%0Af"), "a\rb\rc\nd\ne\nf"
+        )
+
 
 class TestFetch(SelfCleaningTestCase):
     def setUp(self):
