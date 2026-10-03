@@ -875,6 +875,20 @@ Tag-File-Character-Encoding: UTF-8
             str(error_catcher.exception),
         )
 
+    def test_save_restores_working_directory_on_error(self):
+        # save() chdir()s into the bag directory to let its helper functions
+        # work with relative paths. If one of those helpers raises, save()
+        # must still chdir back, or the process is left running inside the
+        # bag directory for the rest of its lifetime.
+        bag = bagit.make_bag(self.tmpdir)
+        starting_cwd = os.getcwd()
+
+        with mock.patch("bagit._make_tag_file", side_effect=RuntimeError("boom")):
+            with self.assertRaises(RuntimeError):
+                bag.save()
+
+        self.assertEqual(os.getcwd(), starting_cwd)
+
     def test_save_manifests(self):
         bag = bagit.make_bag(self.tmpdir)
         self.assertTrue(bag.is_valid())

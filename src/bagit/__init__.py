@@ -452,29 +452,30 @@ class Bag(object):
         old_dir = os.path.abspath(os.path.curdir)
         os.chdir(self.path)
 
-        # Generate new manifest files
-        if manifests:
-            total_bytes, total_files = make_manifests(
-                "data",
-                processes,
-                algorithms=self.algorithms,
-                encoding=self.encoding,
-            )
+        try:
+            # Generate new manifest files
+            if manifests:
+                total_bytes, total_files = make_manifests(
+                    "data",
+                    processes,
+                    algorithms=self.algorithms,
+                    encoding=self.encoding,
+                )
 
-            # Update Payload-Oxum
-            LOGGER.info(_("Updating Payload-Oxum in %s"), self.tag_file_name)
-            self.info["Payload-Oxum"] = "%s.%s" % (total_bytes, total_files)
+                # Update Payload-Oxum
+                LOGGER.info(_("Updating Payload-Oxum in %s"), self.tag_file_name)
+                self.info["Payload-Oxum"] = "%s.%s" % (total_bytes, total_files)
 
-        _make_tag_file(self.tag_file_name, self.info)
+            _make_tag_file(self.tag_file_name, self.info)
 
-        # Update tag-manifest for changes to manifest & bag-info files
-        for alg in self.algorithms:
-            _make_tagmanifest_file(alg, self.path, encoding=self.encoding)
+            # Update tag-manifest for changes to manifest & bag-info files
+            for alg in self.algorithms:
+                _make_tagmanifest_file(alg, self.path, encoding=self.encoding)
 
-        # Reload the manifests
-        self._load_manifests()
-
-        os.chdir(old_dir)
+            # Reload the manifests
+            self._load_manifests()
+        finally:
+            os.chdir(old_dir)
 
     def tagfile_entries(self):
         """Return the manifest entries for tag files (outside the payload)."""
