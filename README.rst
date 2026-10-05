@@ -248,7 +248,12 @@ separate bindings. Patch ``bagit._common.VERSION`` instead. The same applies
 to any other internal helper you were patching directly by its old
 single-file name (e.g. what is now ``bagit.fsutils._check_permissions``) -
 patch it on the module that actually looks it up (``bagit.fsutils``), not on
-the module that merely imports and calls it.
+the module that merely imports and calls it. The same applies to the
+command-line entry point: ``bagit.main()`` now lives in ``cli.py`` and calls
+``bag.make_bag()`` / ``bag.Bag()`` looked up on the ``bag`` module, so tests
+that want to intercept what the CLI does should patch
+``bagit.bag.make_bag`` / ``bagit.bag.Bag`` rather than ``bagit.make_bag`` /
+``bagit.Bag``.
 
 Running the tests
 ~~~~~~~~~~~~~~~~~

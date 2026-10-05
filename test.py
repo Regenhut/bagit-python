@@ -1380,6 +1380,44 @@ class TestCLI(SelfCleaningTestCase):
             mock_stderr.getvalue(),
         )
 
+    def test_make_bag_is_looked_up_on_the_bag_module_at_call_time(self):
+        # cli.main() must call bag.make_bag(), not a copy of the name imported
+        # at module load time, so that patching bagit.bag.make_bag -- the one
+        # canonical patch point -- actually takes effect.
+        calls = []
+
+        def fake_make_bag(*args, **kwargs):
+            calls.append((args, kwargs))
+
+        testargs = ["bagit.py", self.tmpdir]
+
+        with mock.patch("bagit.bag.make_bag", side_effect=fake_make_bag):
+            with mock.patch.object(sys, "argv", testargs):
+                with self.assertRaises(SystemExit):
+                    bagit.main()
+
+        self.assertEqual(len(calls), 1)
+
+    def test_validate_looks_up_bag_on_the_bag_module_at_call_time(self):
+        # Same contract as above, but for the --validate path's Bag(bag_dir).
+        instances = []
+
+        class FakeBag:
+            def __init__(self, path):
+                instances.append(path)
+
+            def validate(self, **kwargs):
+                pass
+
+        testargs = ["bagit.py", "--validate", self.tmpdir]
+
+        with mock.patch("bagit.bag.Bag", new=FakeBag):
+            with mock.patch.object(sys, "argv", testargs):
+                with self.assertRaises(SystemExit):
+                    bagit.main()
+
+        self.assertEqual(instances, [self.tmpdir])
+
     @mock.patch("sys.stdout", new_callable=StringIO)
     @mock.patch("bagit._common.VERSION", new="1.5.4")
     def test_version_flag_reads_the_single_canonical_version(self, mock_stdout):

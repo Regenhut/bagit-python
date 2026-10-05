@@ -5,9 +5,8 @@ import logging
 import re
 import sys
 
-from . import _common
+from . import _common, bag
 from ._common import CHECKSUM_ALGOS, DEFAULT_CHECKSUMS, LOGGER, PACKAGE_DOC, _
-from .bag import Bag, make_bag
 from .errors import BagError
 from .tagfiles import STANDARD_BAG_INFO_HEADERS
 
@@ -156,9 +155,9 @@ def main():
         # validate the bag
         if args.validate:
             try:
-                bag = Bag(bag_dir)
+                the_bag = bag.Bag(bag_dir)
                 # validate throws a BagError or BagValidationError
-                bag.validate(
+                the_bag.validate(
                     processes=args.processes,
                     fast=args.fast,
                     completeness_only=args.completeness_only,
@@ -180,7 +179,7 @@ def main():
         # make the bag
         else:
             try:
-                make_bag(
+                bag.make_bag(
                     bag_dir,
                     bag_info=args.bag_info,
                     processes=args.processes,
