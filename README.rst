@@ -221,6 +221,31 @@ Contributing to bagit-python development
     # MAKE CHANGES
     % uv run pytest
 
+Internal module layout
+~~~~~~~~~~~~~~~~~~~~~~
+
+``bagit.py`` used to be a single file. It is now split into several modules
+under ``src/bagit/`` (``bag.py``, ``cli.py``, ``fsutils.py``, ``hashing.py``,
+``manifests.py``, ``tagfiles.py``, ``errors.py``), with ``bagit/_common.py``
+holding the handful of values (``VERSION``, the logger, translation catalog,
+shared constants) that the others depend on. ``bagit/__init__.py`` re-exports
+the public API from these modules so that ``import bagit`` still works as
+before.
+
+One consequence of the split: values such as ``VERSION`` have a single
+canonical home in ``bagit._common``. Code elsewhere that needs the live value
+(for example ``make_bag()``'s ``Bag-Software-Agent`` tag, or ``--version`` on
+the command line) looks it up there at call time via ``bagit._common.VERSION``
+rather than importing the name by value, specifically so that it stays
+patchable.
+
+If you're upgrading tests or tooling that predate the split: previously
+``mock.patch("bagit.VERSION", ...)`` was enough, because there was only one
+module and therefore only one ``VERSION`` binding. That no longer has any
+effect, because ``bagit.VERSION`` (the re-export in ``__init__.py``) and
+``bagit._common.VERSION`` (what the library actually reads) are now two
+separate bindings. Patch ``bagit._common.VERSION`` instead.
+
 Running the tests
 ~~~~~~~~~~~~~~~~~
 

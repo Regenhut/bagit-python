@@ -65,8 +65,11 @@ class SelfCleaningTestCase(unittest.TestCase):
 
 
 @mock.patch(
-    "bagit.bag.VERSION", new="1.5.4"
-)  # This avoids needing to change expected hashes on each release
+    "bagit._common.VERSION", new="1.5.4"
+)  # This avoids needing to change expected hashes on each release.
+# bagit._common.VERSION is the single canonical location for this value: bag.py
+# and cli.py look it up there at call time instead of importing VERSION by
+# value, so this is the only patch target that actually takes effect.
 class TestSingleProcessValidation(SelfCleaningTestCase):
     def validate(self, bag, *args, **kwargs):
         return bag.validate(*args, **kwargs)
@@ -485,8 +488,10 @@ class TestMultiprocessValidation(TestSingleProcessValidation):
 
 
 @mock.patch(
-    "bagit.bag.VERSION", new="1.5.4"
-)  # This avoids needing to change expected hashes on each release
+    "bagit._common.VERSION", new="1.5.4"
+)  # This avoids needing to change expected hashes on each release.
+# See the comment on TestSingleProcessValidation above: this is the one
+# canonical patch target for VERSION.
 class TestBag(SelfCleaningTestCase):
     def test_make_bag(self):
         info = {"Bagging-Date": "1970-01-01", "Contact-Email": "ehs@pobox.com"}
@@ -1345,6 +1350,23 @@ class TestCLI(SelfCleaningTestCase):
             "error: the following arguments are required: directory",
             mock_stderr.getvalue(),
         )
+
+    @mock.patch("sys.stdout", new_callable=StringIO)
+    @mock.patch("bagit._common.VERSION", new="1.5.4")
+    def test_version_flag_reads_the_single_canonical_version(self, mock_stdout):
+        # VERSION is defined once in bagit._common. bag.py and cli.py must look
+        # it up there at call time (module-qualified access) rather than
+        # importing the name by value, otherwise patching bagit._common.VERSION
+        # -- the one documented, canonical patch point -- silently stops
+        # affecting either make_bag()'s Bag-Software-Agent tag or --version.
+        testargs = ["bagit.py", "--version"]
+
+        with self.assertRaises(SystemExit) as cm:
+            with mock.patch.object(sys, "argv", testargs):
+                bagit.main()
+
+        self.assertEqual(cm.exception.code, 0)
+        self.assertIn("1.5.4", mock_stdout.getvalue())
 
     @mock.patch("sys.stderr", new_callable=StringIO)
     def test_not_enough_processes(self, mock_stderr):

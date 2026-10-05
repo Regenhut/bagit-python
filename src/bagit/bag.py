@@ -8,12 +8,12 @@ import warnings
 from datetime import date
 from urllib.parse import urlparse
 
+from . import _common
 from ._common import (
     CHECKSUM_ALGOS,
     DEFAULT_CHECKSUMS,
     LOGGER,
     PROJECT_URL,
-    VERSION,
     _,
     open_text_file,
 )
@@ -142,7 +142,7 @@ def make_bag(
             bag_info["Bagging-Date"] = date.strftime(date.today(), "%Y-%m-%d")
         if "Bag-Software-Agent" not in bag_info:
             bag_info["Bag-Software-Agent"] = "bagit.py v%s <%s>" % (
-                VERSION,
+                _common.VERSION,
                 PROJECT_URL,
             )
 

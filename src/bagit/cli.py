@@ -5,7 +5,8 @@ import logging
 import re
 import sys
 
-from ._common import CHECKSUM_ALGOS, DEFAULT_CHECKSUMS, LOGGER, PACKAGE_DOC, VERSION, _
+from . import _common
+from ._common import CHECKSUM_ALGOS, DEFAULT_CHECKSUMS, LOGGER, PACKAGE_DOC, _
 from .bag import Bag, make_bag
 from .errors import BagError
 from .tagfiles import STANDARD_BAG_INFO_HEADERS
@@ -32,7 +33,8 @@ def _make_parser():
     """Build the command-line argument parser."""
     parser = BagArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="bagit-python version %s\n\n%s\n" % (VERSION, PACKAGE_DOC.strip()),
+        description="bagit-python version %s\n\n%s\n"
+        % (_common.VERSION, PACKAGE_DOC.strip()),
     )
     parser.add_argument(
         "--processes",
@@ -130,7 +132,7 @@ def _configure_logging(opts):
 def main():
     """Command-line entry point: create or validate the given bags."""
     if "--version" in sys.argv:
-        print(_("bagit-python version %s") % VERSION)
+        print(_("bagit-python version %s") % _common.VERSION)
         sys.exit(0)
 
     parser = _make_parser()
