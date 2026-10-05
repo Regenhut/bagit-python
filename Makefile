@@ -1,4 +1,4 @@
-COMPILED_MESSAGES=$(patsubst %.po,%.mo, $(wildcard locale/*/LC_MESSAGES/bagit-python.po))
+COMPILED_MESSAGES=$(patsubst %.po,%.mo, $(wildcard src/bagit/locale/*/LC_MESSAGES/bagit-python.po))
 
 all: messages compile
 
