@@ -4,6 +4,9 @@ bagit-python
 bagit is a Python library and command line utility for working with
 `BagIt <http://purl.org/net/bagit>`__ style packages.
 
+See `CHANGELOG.rst <CHANGELOG.rst>`_ for behavior-relevant changes between
+releases.
+
 Installation
 ------------
 
@@ -254,6 +257,9 @@ command-line entry point: ``bagit.main()`` now lives in ``cli.py`` and calls
 that want to intercept what the CLI does should patch
 ``bagit.bag.make_bag`` / ``bagit.bag.Bag`` rather than ``bagit.make_bag`` /
 ``bagit.Bag``.
+
+See `CHANGELOG.rst <CHANGELOG.rst>`_ for a quick-reference table of old vs.
+new patch targets.
 
 Running the tests
 ~~~~~~~~~~~~~~~~~
