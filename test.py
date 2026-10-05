@@ -787,6 +787,35 @@ class TestBag(SelfCleaningTestCase):
             str(error_catcher.exception),
         )
 
+    def test_make_bag_checks_permissions_before_changing_directory(self):
+        # Permission checks must happen while still in the original working
+        # directory: _check_permissions is passed the absolute bag_dir path
+        # and doesn't need the chdir, and checking first means we never have
+        # to recover from a failed check while sitting inside bag_dir.
+        call_order = []
+
+        real_check_permissions = bagit.fsutils._check_permissions
+        real_chdir = os.chdir
+
+        def recording_check_permissions(*args, **kwargs):
+            call_order.append("check_permissions")
+            return real_check_permissions(*args, **kwargs)
+
+        def recording_chdir(*args, **kwargs):
+            call_order.append("chdir")
+            return real_chdir(*args, **kwargs)
+
+        with mock.patch(
+            "bagit.fsutils._check_permissions", side_effect=recording_check_permissions
+        ), mock.patch("os.chdir", side_effect=recording_chdir):
+            bagit.make_bag(self.tmpdir)
+
+        self.assertIn("check_permissions", call_order)
+        self.assertIn("chdir", call_order)
+        self.assertLess(
+            call_order.index("check_permissions"), call_order.index("chdir")
+        )
+
     def test_make_bag_with_unwritable_source(self):
         path_suffixes = ("", "loc")
 

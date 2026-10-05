@@ -8,7 +8,7 @@ import warnings
 from datetime import date
 from urllib.parse import urlparse
 
-from . import _common
+from . import _common, fsutils
 from ._common import (
     CHECKSUM_ALGOS,
     DEFAULT_CHECKSUMS,
@@ -24,7 +24,7 @@ from .errors import (
     FileMissing,
     UnexpectedFile,
 )
-from .fsutils import _check_permissions, normalize_unicode
+from .fsutils import normalize_unicode
 from .hashing import (
     _calc_hashes,
     _multiprocessing_pool_map,
@@ -82,7 +82,11 @@ def make_bag(
     old_dir = cwd
 
     try:
-        _check_permissions(bag_dir)
+        # Permission checks must run before os.chdir() below: _check_permissions
+        # uses the absolute bag_dir path, and checking first lets us raise
+        # without having moved the process into a directory it can't safely
+        # operate in.
+        fsutils._check_permissions(bag_dir)
 
         LOGGER.info(_("Creating data directory"))
 
@@ -367,7 +371,7 @@ class Bag(object):
                 % self.path
             )
 
-        _check_permissions(self.path)
+        fsutils._check_permissions(self.path)
 
         # Change working directory to bag directory so helper functions work
         old_dir = os.path.abspath(os.path.curdir)

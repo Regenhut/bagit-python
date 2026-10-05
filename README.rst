@@ -244,7 +244,11 @@ If you're upgrading tests or tooling that predate the split: previously
 module and therefore only one ``VERSION`` binding. That no longer has any
 effect, because ``bagit.VERSION`` (the re-export in ``__init__.py``) and
 ``bagit._common.VERSION`` (what the library actually reads) are now two
-separate bindings. Patch ``bagit._common.VERSION`` instead.
+separate bindings. Patch ``bagit._common.VERSION`` instead. The same applies
+to any other internal helper you were patching directly by its old
+single-file name (e.g. what is now ``bagit.fsutils._check_permissions``) -
+patch it on the module that actually looks it up (``bagit.fsutils``), not on
+the module that merely imports and calls it.
 
 Running the tests
 ~~~~~~~~~~~~~~~~~
