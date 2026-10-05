@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-05 12:14-0400\n"
+"POT-Creation-Date: 2026-10-05 22:03+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,35 +80,16 @@ msgstr ""
 msgid "Bag directory %s does not exist"
 msgstr ""
 
-#, python-format
-msgid ""
-"Unable to write to the following directories and files:\n"
-"%s"
-msgstr ""
-
-msgid "Missing permissions to move all files and directories"
-msgstr ""
-
-#, python-format
-msgid ""
-"The following directories do not have read permissions:\n"
-"%s"
-msgstr ""
-
-#, python-format
-msgid ""
-"The following files do not have read permissions:\n"
-"%s"
-msgstr ""
-
-msgid "Read permissions are required to calculate file fixities"
-msgstr ""
-
 msgid "Creating data directory"
 msgstr ""
 
 #, python-format
 msgid "Moving %(source)s to %(destination)s"
+msgstr ""
+
+msgid ""
+"PermissionError [WinError 5] when renaming temp folder. Retrying in 10 "
+"seconds..."
 msgstr ""
 
 msgid "Creating bagit.txt"
@@ -152,12 +133,6 @@ msgstr ""
 
 #, python-format
 msgid "Cannot save bag to non-existent or inaccessible directory %s"
-msgstr ""
-
-#, python-format
-msgid ""
-"Missing write permissions for the following directories and files:\n"
-"%s"
 msgstr ""
 
 #, python-format
@@ -241,63 +216,6 @@ msgstr ""
 
 #, python-format
 msgid ""
-"%(path)s %(algorithm)s validation failed: expected=\"%(expected)s\" "
-"found=\"%(found)s\""
-msgstr ""
-
-#, python-format
-msgid "%s exists in manifest but was not found on filesystem"
-msgstr ""
-
-#, python-format
-msgid "%s exists on filesystem but is not in the manifest"
-msgstr ""
-
-#, python-format
-msgid ""
-"Unicode normalization conflict for file \"%(file_a)s\" and \"%(file_b)s\""
-msgstr ""
-
-#, python-format
-msgid "Disabling requested hash algorithm %s: hashlib does not support it"
-msgstr ""
-
-msgid ""
-"Unable to continue: hashlib does not support any of the requested algorithms!"
-msgstr ""
-
-#, python-format
-msgid "Verifying checksum for file %s"
-msgstr ""
-
-#, python-format
-msgid "Could not read %(filename)s: %(error)s"
-msgstr ""
-
-#, python-format
-msgid "%(filename)s contains invalid tag: %(line)s"
-msgstr ""
-
-#, python-format
-msgid "Using %(process_count)d processes to generate manifests: %(algorithms)s"
-msgstr ""
-
-msgid "Expected the same number of files for each checksum"
-msgstr ""
-
-msgid "Expected the same number of bytes for each checksums"
-msgstr ""
-
-#, python-format
-msgid "Creating %s"
-msgstr ""
-
-#, python-format
-msgid "Generating manifest lines for file %s"
-msgstr ""
-
-#, python-format
-msgid ""
 "Use multiple processes to calculate checksums faster (default: %(default)s)"
 msgstr ""
 
@@ -375,4 +293,85 @@ msgstr ""
 
 #, python-format
 msgid "Failed to create bag in %(bag_directory)s: %(error)s"
+msgstr ""
+
+#, python-format
+msgid ""
+"%(path)s %(algorithm)s validation failed: expected=\"%(expected)s\" "
+"found=\"%(found)s\""
+msgstr ""
+
+#, python-format
+msgid "%s exists in manifest but was not found on filesystem"
+msgstr ""
+
+#, python-format
+msgid "%s exists on filesystem but is not in the manifest"
+msgstr ""
+
+#, python-format
+msgid ""
+"Unicode normalization conflict for file \"%(file_a)s\" and \"%(file_b)s\""
+msgstr ""
+
+#, python-format
+msgid ""
+"Unable to write to the following directories and files:\n"
+"%s"
+msgstr ""
+
+msgid "Missing permissions to move all files and directories"
+msgstr ""
+
+#, python-format
+msgid ""
+"The following directories do not have read permissions:\n"
+"%s"
+msgstr ""
+
+#, python-format
+msgid ""
+"The following files do not have read permissions:\n"
+"%s"
+msgstr ""
+
+msgid "Read permissions are required to calculate file fixities"
+msgstr ""
+
+#, python-format
+msgid "Disabling requested hash algorithm %s: hashlib does not support it"
+msgstr ""
+
+msgid ""
+"Unable to continue: hashlib does not support any of the requested algorithms!"
+msgstr ""
+
+#, python-format
+msgid "Verifying checksum for file %s"
+msgstr ""
+
+#, python-format
+msgid "Could not read %(filename)s: %(error)s"
+msgstr ""
+
+#, python-format
+msgid "Using %(process_count)d processes to generate manifests: %(algorithms)s"
+msgstr ""
+
+msgid "Expected the same number of files for each checksum"
+msgstr ""
+
+msgid "Expected the same number of bytes for each checksums"
+msgstr ""
+
+#, python-format
+msgid "Generating manifest lines for file %s"
+msgstr ""
+
+#, python-format
+msgid "Creating %s"
+msgstr ""
+
+#, python-format
+msgid "%(filename)s contains invalid tag: %(line)s"
 msgstr ""
